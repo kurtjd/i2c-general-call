@@ -1,5 +1,6 @@
-//! I2C General Call Driver
-//! TODO
+//! A platform agnostic Rust driver for making I2C general calls.
+//!
+//! Currently supports software general calls (reset and address latching).
 #![no_std]
 
 use embedded_hal::i2c;

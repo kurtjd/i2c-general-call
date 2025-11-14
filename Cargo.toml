@@ -1,6 +1,13 @@
 [package]
 name = "i2c-general-call"
 version = "0.1.0"
+authors = ["Kurtis Dinelle <kurtis.dinelle@gmail.com>"]
+repository = "https://github.com/kurtjd/i2c-general-call"
+license = "MIT"
+description = "Platform-agnostic Rust driver for I2C general calls."
+readme = "README.md"
+homepage = "https://github.com/kurtjd/i2c-general-call"
+documentation = "https://docs.rs/i2c-general-call"
 edition = "2024"
 
 [features]
