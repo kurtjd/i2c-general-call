@@ -132,7 +132,7 @@ impl<E: i2c::Error, I2C: AsyncI2c<Error = E>> GeneralCall<I2C> {
     ///
     /// # Errors
     ///
-    /// If a command of 0x00 is issued, immediately returns [`Error::Invalid`] as that is now allowed
+    /// If a command of 0x00 is issued, immediately returns [`Error::Invalid`] as that is not allowed
     /// according to spec.
     ///
     /// If no device accepts general calls, [`Error::NoAckCall`] will be returned.
