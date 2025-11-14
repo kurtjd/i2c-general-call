@@ -1,5 +1,6 @@
 //! I2C General Call Driver
 //! TODO
+#![no_std]
 
 use embedded_hal::i2c;
 #[cfg(not(feature = "async"))]
@@ -26,6 +27,8 @@ impl From<Command> for u8 {
 }
 
 /// I2C general call error.
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error<E> {
     /// No device on the bus acknowledged the general call.
     NoAckCall,
