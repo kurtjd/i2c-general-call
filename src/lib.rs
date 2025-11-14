@@ -9,8 +9,6 @@ use embedded_hal_async::i2c::I2c as AsyncI2c;
 
 // General call (aka broadcast) address
 const GENERAL_CALL_ADDR: u8 = 0x00;
-// A command byte of 0x00 is not allowed according to spec
-const INVALID_CMD: u8 = 0x00;
 
 // Only two specified commands
 enum Command {
@@ -33,12 +31,11 @@ pub enum Error<E> {
     NoAckCall,
     /// At least one device on the bus acknowledged the general call, but not the specific command.
     NoAckCmd,
-    /// Invalid command was used in general call.
-    Invalid,
     /// Other I2C error was encountered.
     I2C(E),
 }
 
+/// I2C general call driver.
 #[maybe_async_cfg::maybe(
     sync(
         cfg(not(feature = "async")),
@@ -47,7 +44,6 @@ pub enum Error<E> {
     ),
     async(feature = "async", keep_self)
 )]
-/// I2C general call driver.
 pub struct GeneralCall<I2C: AsyncI2c> {
     i2c: I2C,
 }
@@ -124,7 +120,8 @@ impl<E: i2c::Error, I2C: AsyncI2c<Error = E>> GeneralCall<I2C> {
         Self::res_map(res)
     }
 
-    /// Issue an arbitrary command general call.
+    /// Issue an arbitrary command general call. The command code must be nonzero as that is
+    /// forbidden by spec.
     ///
     /// If successful, then at least one device on the bus ACKed the command.
     /// However, there is no guarantee that it actually performed the command. One should verify
@@ -132,21 +129,14 @@ impl<E: i2c::Error, I2C: AsyncI2c<Error = E>> GeneralCall<I2C> {
     ///
     /// # Errors
     ///
-    /// If a command of 0x00 is issued, immediately returns [`Error::Invalid`] as that is not allowed
-    /// according to spec.
-    ///
     /// If no device accepts general calls, [`Error::NoAckCall`] will be returned.
     ///
     /// If at least one device accepts general calls but not the command,
     /// [`Error::NoAckCmd`] will be returned.
     ///
     /// If any other I2C error occurs, the underlying error will be returned.
-    pub async fn call(&mut self, cmd: u8) -> Result<(), Error<E>> {
-        if cmd == INVALID_CMD {
-            Err(Error::Invalid)
-        } else {
-            let res = self.i2c.write(GENERAL_CALL_ADDR, &[cmd]).await;
-            Self::res_map(res)
-        }
+    pub async fn call(&mut self, cmd: core::num::NonZeroU8) -> Result<(), Error<E>> {
+        let res = self.i2c.write(GENERAL_CALL_ADDR, &[cmd.get()]).await;
+        Self::res_map(res)
     }
 }
